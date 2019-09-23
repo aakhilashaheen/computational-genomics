@@ -1,4 +1,4 @@
-Percentage match >= 97: 0.989980656799
+Percentage match >= 97: 0.17421802688
 Most common species in the query is  Faecalibacterium_prausnitzii with 9154 occurrences.
 Average Similarity: 98.4778685867
 
