@@ -35,23 +35,69 @@ import numpy as np
 
 # Runs plain old needleman wunsch algorithm
 def needleman_wunsch(query, ref):
-    n = len(ref)
-    m = len(query)
-    matrix = np.zeros((n+1, m+1))
+    rows = len(ref)
+    columns = len(query)
+    matrix = np.zeros((rows+1, columns+1))
     MISMATCH_PENALITY = -3
     MATCH_BOOST = 1
     GAP_PENALITY = -2
-    matrix[0][0] = 0
-    for i in range(1, m+1):
-        matrix[0][i] = matrix[0][i-1] + GAP_PENALITY
-    for i in range(1, n+1):
-        matrix[i][0] = matrix[i-1][0] + GAP_PENALITY
-    for i in range (1, n+1):
-        for j in range(1, m+1):
-            diag = matrix[i-1][j-1]+MATCH_BOOST if ref[i-1] == query[j-1] else  matrix[i-1][j-1]+MISMATCH_PENALITY
-            top = matrix[i-1][j]+ GAP_PENALITY
-            left = matrix[i][j-1]+ GAP_PENALITY
-            matrix[i][j] = max([diag, top, left])
+    matrix[0,0] = 0
+    for i in range(1, columns+1):
+        matrix[0,i] = matrix[0,i-1] + GAP_PENALITY
+    for i in range(1, rows+1):
+        matrix[i,0] = matrix[i-1, 0] + GAP_PENALITY
+    print(repr(matrix))
+    for i in range (1, rows+1):
+        for j in range(1, columns+1):
+            diag = matrix[i-1, j-1]+MATCH_BOOST if ref[i-1] == query[j-1] else  matrix[i-1, j-1]+MISMATCH_PENALITY
+            top = matrix[i-1, j]+ GAP_PENALITY
+            left = matrix[i, j-1]+ GAP_PENALITY
+            matrix[i, j] = max([diag, top, left])
+
+    
+    #To get the alignments
+    global_score = matrix[rows, columns]
+    i = rows
+    j = columns
+    alignment1 = ""
+    alignment2 = ""
+    
+    while i > 0 and j > 0:
+        diag = matrix[i-1, j-1]
+        up = matrix[i-1, j]
+        left = matrix[i, j-1]
+        maximum = max([diag, up, left])
+
+        if maximum == diag:
+            alignment1 =  ref[i-1] + alignment1
+            alignment2 =  query[j-1] + alignment2
+            i -=1
+            j -=1
+
+        elif maximum == left:
+            alignment1 = '-' + alignment1
+            alignment2 = query[j-1] + alignment2
+            j -=1
+
+        else:
+            alignment1 = ref[i-1] + alignment1
+            alignment2 = '-' + alignment2
+            i -=1
+    
+    while j > 0:
+        alignment1 = '-' + alignment1
+        alignment2 = query[j-1] + alignment2
+        j -=1
+
+    while i > 0:
+        alignment1 = ref[i-1] + alignment1
+        alignment2 = '-' + alignment2
+        i -=1
+
+    print(alignment1)
+    print(alignment2)
+    print(global_score)
+    
 
 
 
@@ -71,6 +117,6 @@ def needleman_wunsch(query, ref):
 
 
 def __main__():
-    needleman_wunsch("ACAA", "ACTGA")
+    needleman_wunsch("AAAA", "AAAA")
 
 __main__()
