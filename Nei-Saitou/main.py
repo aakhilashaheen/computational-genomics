@@ -1,5 +1,4 @@
 import sys
-
 # function to calculate the difference between two input id_sequences
 # simply counts mismatches and return the percentage as a float
 def distance(seq1,seq2):
