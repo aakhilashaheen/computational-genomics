@@ -1,4 +1,5 @@
 import sys
+from nei_saitou import *
 # function to calculate the difference between two input id_sequences
 # simply counts mismatches and return the percentage as a float
 def distance(seq1,seq2):
@@ -51,6 +52,24 @@ def read_fasta_file(filename):
 
 
 
+# uses preorder traversal to traverse the tree and generate the edges file
+def write_edge_file(root):
+    traversal = []
+    # recursive preorder traversal
+    def preorder_traversal(node):
+        if not node or not node.children:
+            return
+        for child, distance in node.children.items():
+            # traverse root first
+            traversal.append((node.id, child.id, distance))
+            # then traverse children recursively
+            preorder_traversal(child)
+    preorder_traversal(root)
+    # writes the traversal list to file
+    with open('edges.txt', 'w') as f:
+        for (parent, child, distance) in traversal:
+            f.write(parent + '\t' + child + '\t' + str(distance) + '\n')
+
 
 
 def main(filename):
@@ -62,6 +81,13 @@ def main(filename):
 
     # write the distances.txt file (distance matrix)
     write_distance_matrix(ids, distances)
+
+    # Get the root of the tree
+    root = build_phylogeny(ids, distances)
+
+    # write the edge file using preorder traversal
+    write_edge_file(root)
+
 
 if __name__ == '__main__':
 	main(sys.argv[1])
