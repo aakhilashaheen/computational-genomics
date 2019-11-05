@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 from node import Node
 import sys
 import random
-from neighbour_joining import Neighbour_Joining
+import neighbour_joining
 import utils
 
 
@@ -133,8 +134,8 @@ def bootstrap(original_root, ids, id_sequences):
                 new_sequence += id_sequences[id][index]
             bootstrap_sequences[id] = new_sequence
         # do the nei_saitou and get a new tree
-        distance_matrix = get_difference_matrix(ids, bootstrap_sequences)
-        root = nei_saitou(ids, distance_matrix)
+        distMatrix = get_difference_matrix(ids, bootstrap_sequences)
+        root = nei_saitou(ids, distMatrix)
         # get the dictionary of partitions and ids under those partitions
         partitions = get_partitions(root)
 
@@ -157,12 +158,15 @@ def main(filename):
     ids, sequences = read_fasta_file(filename)
 
     # Then generate the distance matrix
-    distance_matrix = utils.get_distance_matrix(ids, sequences)
+    distMatrix = utils.get_distMatrix(ids, sequences)
 
     # write the distances.txt file (distance matrix)
-    utils.write_distance_matrix(ids, distance_matrix)
+    utils.write_distMatrix(ids, distMatrix)
   
-    root = Neighbour_Joining.nei_saitou(ids, distance_matrix, 120)
+    seqCounter = 120
+
+    Neighbour_Joining_instance = neighbour_joining.Neighbour_Joining()
+    root = Neighbour_Joining_instance.nei_saitou(ids, distMatrix, seqCounter)
 
     # write the edge file using preorder traversal
     write_edge_file(root)
