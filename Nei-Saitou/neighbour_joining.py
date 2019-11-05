@@ -7,31 +7,31 @@ import utils
 class Neighbour_Joining:
 
     #Applies nei_saitou to calculte the distances recursively and get the phylogeny tree
-    def nei_saitou(self, original_ids, original_distMatrix, nodeId):
+    def nei_saitou(self, original_ids, original_distMatrix, seqCounter):
         #Using a global root holder
         global root
         root = None
         # Maintaining a map for the relationships between child and parent
         relationship_map = {}
 
-        # keeps track of id -> index mappings for O(1) lookup
-        seqId_index_map = {}
+        # Using a mapping for seqId and new ids.
+        seqId_orderId_map = {}
         for i, id in enumerate(original_ids):
-            seqId_index_map[id] = str(i + 1)
+            seqId_orderId_map[id] = str(i + 1)
         
-        def calculate_next_neighbours(ids, distMatrix, nodeId, seqId_index_map):
+        def calculate_next_neighbours(ids, distMatrix, seqCounter, seqId_orderId_map):
             global root
             N  = len(distMatrix)
 
             # Base case for recursion
             if N <= 2:
                 # Assigning the ids to these nodes according to the requirements
-                if ids[0] in seqId_index_map:
-                    tip_1 = seqId_index_map[ids[0]]
+                if ids[0] in seqId_orderId_map:
+                    tip_1 = seqId_orderId_map[ids[0]]
                 else:
                     tip_1 = ids[0]
-                if ids[1] in seqId_index_map:
-                    tip_2 = seqId_index_map[ids[1]]
+                if ids[1] in seqId_orderId_map:
+                    tip_2 = seqId_orderId_map[ids[1]]
                 else:
                     tip_2 = ids[1]
                 # Adding their relationship to the tree
@@ -41,36 +41,35 @@ class Neighbour_Joining:
                 return
 
             #First step is to get the closest two tips from the distance matrix
-            mini, minj, minVal = utils.construct_Q_matrix(distMatrix)
-            # get the edge lengths
-            edge_i, edge_j = utils.calculate_edge_lengths(distMatrix, mini, minj)
-
+            mini, minj, minVal = utils.construct_QMatrix(distMatrix)
+          
+            edge_i, edge_j = utils.calculate_edge_lengths(distMatrix, mini, minj, N)
+            #print(edge_i, edge_j)
             tip_1 = tip_2 = None
             # Setting the new ids to the tips/ internal node
-            if ids[mini] in seqId_index_map:
-                tip_1 = seqId_index_map[ids[mini]]
+            if ids[mini] in seqId_orderId_map:
+                tip_1 = seqId_orderId_map[ids[mini]]
             else:
                 tip_1 = ids[mini]
-            if ids[minj] in seqId_index_map:
-                tip_2 = seqId_index_map[ids[minj]]
+            if ids[minj] in seqId_orderId_map:
+                tip_2 = seqId_orderId_map[ids[minj]]
             else:
                 tip_2 = ids[minj]
             
             # Add them to the tree relationships
-            relationship_map[tip_1] = (str(nodeId), edge_i)
-            relationship_map[tip_2] = (str(nodeId), edge_j)
+            relationship_map[tip_1] = (str(seqCounter), edge_i)
+            relationship_map[tip_2] = (str(seqCounter), edge_j)
 
-            # Remove the used ids and add the new nodeId
-            ids = [id for id in ids if id not in (ids[mini], ids[minj])] + [str(nodeId)]
+            # Remove the used ids and add the new seqCounter
+            ids = [id for id in ids if id not in (ids[mini], ids[minj])] + [str(seqCounter)]
 
-            nodeId -=1
-            new_distMatrix = utils.calculate_new_distMatrix(distMatrix, mini, minj)
+            seqCounter -=1
+            new_distMatrix = utils.calculate_new_distMatrix(distMatrix, mini, minj, N)
 
             # recursively call with the new distance matrix
-            calculate_next_neighbours(ids, new_distMatrix, nodeId, seqId_index_map)
+            calculate_next_neighbours(ids, new_distMatrix, seqCounter, seqId_orderId_map)
 
-        # initial call to the recursive helper function with the original params
-        calculate_next_neighbours(original_ids, original_distMatrix, nodeId, seqId_index_map)
+        calculate_next_neighbours(original_ids, original_distMatrix, seqCounter, seqId_orderId_map)
 
         # construct tree from the relationship_map relations
         rootNode = Node(root)
