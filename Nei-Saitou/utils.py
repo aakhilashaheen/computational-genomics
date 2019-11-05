@@ -66,21 +66,16 @@ def calculate_edge_lengths(distMatrix, mini, minj):
 
 def calculate_new_distMatrix(distMatrix, mini, minj):
     N = len(distMatrix)
-    copyMatrix = [[0] * (N + 1) for _ in range(N + 1)]
+    updatedDistances = [[0] * (N + 1) for _ in range(N + 1)]
 
-    # copy everything over
-    for i in range(N):
-        for j in range(N):
-            copyMatrix[i][j] = distMatrix[i][j]
     # update the distances to the new node
     for k in range(N):
-        copyMatrix[N][k] = (0.5) * (distMatrix[mini][k] + distMatrix[minj][k] - distMatrix[mini][minj])
-        copyMatrix[k][N] = copyMatrix[N][k]
+        updatedDistances[N][k] = (0.5) * (distMatrix[mini][k] + distMatrix[minj][k] - distMatrix[mini][minj])
+        updatedDistances[k][N] = updatedDistances[N][k]
 
-    # shrink the tmp matrix to create the new distance matrix
+    # Creates a new distance matrix and fills it using the updated values in copyMatrix
     new_distMatrix = [[0] * (N - 1) for _ in range(N - 1)]
 
-    # where to move values from tmp values to the new_distMatrix
     keep_i = keep_j = 0
     for i in range(N + 1):
         # Replacing these two with a new node
@@ -91,7 +86,7 @@ def calculate_new_distMatrix(distMatrix, mini, minj):
             # Replacing these two with the new node
             if j == mini or j == minj:
                 continue
-            new_distMatrix[keep_i][keep_j] = copyMatrix[i][j]
+            new_distMatrix[keep_i][keep_j] = updatedDistances[i][j]
             keep_j += 1
         keep_i += 1
 

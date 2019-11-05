@@ -11,44 +11,39 @@ def write_edge_file(root):
     traversal = []
     # recursive preorder traversal
     def preorder_traversal(node):
-        if not node or not node.children:
+        # Base case for recursion
+        if  node is None or  node.children is None:
             return
         for child, distance in node.children.items():
-            print(node.id)
-            print(child.id)
             # traverse root first
             traversal.append((node.id, child.id, distance))
             # then traverse children recursively
             preorder_traversal(child)
     preorder_traversal(root)
-    # writes the traversal list to file
+    # Finall write to the edges file
     with open('edges.txt', 'w') as f:
         for (parent, child, distance) in traversal:
             f.write(parent + '\t' + child + '\t' + str(distance) + '\n')
 
 
-# uses post order traversal to write the newick file
-def write_newick_file(original_ids, root):
-    # recursive postorder traversal
+# Using post order traversal of the tree for newick file
+def write_newick_file(seqIds, root):
     def postorder_traversal(node):
-        if not node.children:
-            # if it a leaf node then return the original id
+        if  node.children is None:
             if 1 <= int(node.id) <= 61:
-                return original_ids[int(node.id) - 1]
-        vals = []
+                return seqIds[int(node.id) - 1]
+        traversal = []
         # recursively traverse the children first
         for child, distance in node.children.items():
-            vals.append(postorder_traversal(child) + ':' + str(distance))
-        result = '(' + ','.join(vals) + ')'
+            traversal.append(postorder_traversal(child) + ':' + str(distance))
+        result = '(' + ','.join(traversal) + ')'
         return result
-    # get the root nodes children.
-    # split it up into a 2 pair and 1 extra node for the root
-    (first, fd), (second, sd), (third, td) = root.children.items()
-    # recursively call the postorder traversal function to generate the newick format
-    first_part = '(' + postorder_traversal(second) + ':' + str(sd) + ','+ postorder_traversal(third) + ':' + str(td) + ')'
-    newick =  '(' + first_part + ':' + str(fd) + ');'
+    (parentNode, pN), (child1, c1), (child2, c2) = root.children.items()
+    # Following the format mentioned. Performing postorder on the children
+    prefix = '(' + postorder_traversal(child1) + ':' + str(c1) + ','+ postorder_traversal(child2) + ':' + str(c2) + ')'
+    entireOrder =  '(' + prefix + ':' + str(pN) + ');'
     with open('tree.txt', 'w') as f:
-        f.write(newick)
+        f.write(entireOrder)
 
 
 # Function that reads the given fasta file and gets the sequences.
@@ -134,8 +129,10 @@ def bootstrap(original_root, ids, id_sequences):
                 new_sequence += id_sequences[id][index]
             bootstrap_sequences[id] = new_sequence
         # do the nei_saitou and get a new tree
-        distMatrix = get_difference_matrix(ids, bootstrap_sequences)
-        root = nei_saitou(ids, distMatrix)
+        distMatrix = utils.get_distMatrix(ids, bootstrap_sequences)
+        seqCounter = 120
+        Neighbour_Joining_instance = neighbour_joining.Neighbour_Joining()
+        root = Neighbour_Joining_instance.nei_saitou(ids, distMatrix, seqCounter)
         # get the dictionary of partitions and ids under those partitions
         partitions = get_partitions(root)
 
@@ -168,15 +165,15 @@ def main(filename):
     Neighbour_Joining_instance = neighbour_joining.Neighbour_Joining()
     root = Neighbour_Joining_instance.nei_saitou(ids, distMatrix, seqCounter)
 
-    # write the edge file using preorder traversal
+    # Writing the edge file
     write_edge_file(root)
 
-    #write the newick file using postorder traversal
+    # Writing the newick file
     write_newick_file(ids, root)
 
-    # bootstrap bonus points
-    #percentages = bootstrap(root, ids, id_sequences)
-    #write_bootstrap(percentages)
+    #bootstrap calculations
+    percentages = bootstrap(root, ids, sequences)
+    write_bootstrap(percentages)
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ import utils
 # Holds the methods to join neighbours
 class Neighbour_Joining:
 
-    #Applies nei_saitou to calculte the distances recursively and get the phylog
+    #Applies nei_saitou to calculte the distances recursively and get the phylogeny tree
     def nei_saitou(self, original_ids, original_distMatrix, nodeId):
         #Using a global root holder
         global root
@@ -74,28 +74,18 @@ class Neighbour_Joining:
 
         # construct tree from the relationship_map relations
         rootNode = Node(root)
-        # queue for breadth first search
         queue = [rootNode]
-
-        # bfs to construct the tree
-        # will end when all nodes have been traversed
+        # bfs for tree construction
         while len(queue) > 0:
-            tmp = []
+            nodeList = []
             for node in queue:
-                print(node.id)
-                # for every parent node taht matches the current node, create
-                # a new child node and add it to the queue and add it as a child
                 for child, (parent, distance) in relationship_map.items():
                     if parent == node.id:
                         childNode = Node(child)
                         node.add_child(childNode, distance)
-                        tmp.append(childNode)
-            # delete the node in the dictionary so we dont reuse it
-            for node in tmp:
+                        nodeList.append(childNode)
+            for node in nodeList:
                 del relationship_map[node.id]
-            # the queue is set to the next level
-            queue = tmp
-
-        # return the root of the tree
+            queue = nodeList
         return rootNode
 
