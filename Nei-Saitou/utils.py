@@ -133,23 +133,23 @@ def write_edge_file(root):
         for (parent, child, distance) in visited:
             f.write(parent + '\t' + child + '\t' + str(distance) + '\n')
 
-
-# Using post order traversal of the tree for newick file
+# uses post order traversal to write the newick file
 def write_newick_file(seqIds, root):
+    # recursive postorder traversal
     def postorder_traversal(node):
-        if  node.children is None:
+        if not node.children:
             if 1 <= int(node.id) <= 61:
                 return seqIds[int(node.id) - 1]
-        traversal = []
+        visited = []
         # recursively traverse the children first
         for child, distance in node.children.items():
-            traversal.append(postorder_traversal(child) + ':' + str(distance))
-        result = '(' + ','.join(traversal) + ')'
+            visited.append(postorder_traversal(child) + ':' + str(distance))
+        result = '(' + ','.join(visited) + ')'
         return result
-    (parentNode, pN), (child1, c1), (child2, c2) = root.children.items()
-    # Following the format mentioned. Performing postorder on the children
-    prefix = '(' + postorder_traversal(child1) + ':' + str(c1) + ','+ postorder_traversal(child2) + ':' + str(c2) + ')'
-    entireOrder =  '(' + prefix + ':' + str(pN) + ');'
+ 
+    (first, f), (second, s), (third, t) = root.children.items()
+    # recursively call the postorder traversal function to generate the newick format
+    first_part = '(' + postorder_traversal(second) + ':' + str(s) + ','+ postorder_traversal(third) + ':' + str(t) + ')'
+    newick =  '(' + first_part + ':' + str(f) + ');'
     with open('tree.txt', 'w') as f:
-        f.write(entireOrder)
-
+        f.write(newick)
