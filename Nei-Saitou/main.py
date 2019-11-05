@@ -26,11 +26,13 @@ def main(filename):
 
     # Writing the newick file
     utils.write_newick_file(ids, root)
-    Bootstrap_instance = bootstrap.Bootstrap()
+
     #bootstrap calculations
+    Bootstrap_instance = bootstrap.Bootstrap()
     percentages = Bootstrap_instance.bootstrap(root, ids, sequences)
     utils.write_bootstrap(percentages)
 
 
 if __name__ == '__main__':
     main(sys.argv[1])
+    

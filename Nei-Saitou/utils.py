@@ -70,6 +70,27 @@ def construct_QMatrix(distMatrix):
     return mini, minj, minVal
 
 
+# uses post order traversal to write the newick file
+def write_newick_file(seqIds, root):
+    # recursive postorder traversal
+    def postorder_traversal(node):
+        if not node.children:
+            if 1 <= int(node.id) <= 61:
+                return seqIds[int(node.id) - 1]
+        visited = []
+        # recursively traverse the children first
+        for child, distance in node.children.items():
+            visited.append(postorder_traversal(child) + ':' + str(distance))
+        result = '(' + ','.join(visited) + ')'
+        return result
+ 
+    (first, f), (second, s), (third, t) = root.children.items()
+    first_part = '(' + postorder_traversal(second) + ':' + str(s) + ','+ postorder_traversal(third) + ':' + str(t) + ')'
+    newick =  '(' + first_part + ':' + str(f) + ');'
+    with open('tree.txt', 'w') as f:
+        f.write(newick)
+
+
 # Calculates the edge lengths to the u node and returns the lengths.
 def calculate_edge_lengths(distMatrix, mini, minj, N):
     # Distances to the new internal node
@@ -133,23 +154,3 @@ def write_edge_file(root):
         for (parent, child, distance) in visited:
             f.write(parent + '\t' + child + '\t' + str(distance) + '\n')
 
-# uses post order traversal to write the newick file
-def write_newick_file(seqIds, root):
-    # recursive postorder traversal
-    def postorder_traversal(node):
-        if not node.children:
-            if 1 <= int(node.id) <= 61:
-                return seqIds[int(node.id) - 1]
-        visited = []
-        # recursively traverse the children first
-        for child, distance in node.children.items():
-            visited.append(postorder_traversal(child) + ':' + str(distance))
-        result = '(' + ','.join(visited) + ')'
-        return result
- 
-    (first, f), (second, s), (third, t) = root.children.items()
-    # recursively call the postorder traversal function to generate the newick format
-    first_part = '(' + postorder_traversal(second) + ':' + str(s) + ','+ postorder_traversal(third) + ':' + str(t) + ')'
-    newick =  '(' + first_part + ':' + str(f) + ');'
-    with open('tree.txt', 'w') as f:
-        f.write(newick)
