@@ -16,7 +16,6 @@ def get_conserved(dictionary):
         total_count = len(dictionary.keys())
         conserved_per_region = {}
         for key, value in dictionary.items():
-            #print(key, value[i])
             if value[i] == '-':
                 continue
             if value[i] in conserved_per_region:
@@ -32,32 +31,22 @@ def get_conserved(dictionary):
             all_conserved.append(0)
     return all_conserved
 
-def write_regions(regions):
-    with open('regions.txt', 'w') as f:
-        for x1, x2 in regions:
-            f.write(str(x1) + '\t' + str(x2) + '\n')
-
-def plot_variabilities(variabilities):
-    x = np.arange(1, len(variabilities)+1)
-    y = np.array(variabilities)
-    # plt.plot(x,y)
-    # plt.show()
-
-
-def running_mean(l, N):
+# Calculates the running mean for smoothing
+def running_mean(variabilies, N):
     sum = 0
-    result = list( 0 for x in l)
+    result = list( 0 for x in variabilies)
  
     for i in range( 0, N ):
-        sum = sum + l[i]
+        sum = sum + variabilies[i]
         result[i] = sum / (i+1)
  
-    for i in range( N, len(l) ):
-        sum = sum - l[i-N] + l[i]
+    for i in range( N, len(variabilies) ):
+        sum = sum - variabilies[i-N] + variabilies[i]
         result[i] = sum / N
  
     return result
 
+# Gets the smoothing for variabilites and plots it
 def plot_smooth_variabilites(variabilities):
     y = np.array(running_mean(variabilities, N=30))
     x = np.arange(1, len(y)+1)
@@ -65,8 +54,9 @@ def plot_smooth_variabilites(variabilities):
     plt.show()    
     return y
 
+# Identifying the variable regions using a window size and threshold for density
+# The density estimation is set using experiments.
 def get_variable_regions(variabilities):
-    # some example data
     window_size = 40
     threshold = 0.81
     prevInterval = []
@@ -94,25 +84,36 @@ def get_variable_regions(variabilities):
 
     return regions
 
+#Plots the variabilites with region markers
 def plot_variabilities_with_regions(variabilities):
     y = np.array(running_mean(variabilities, N=30))
     x = np.arange(1, len(y)+1)
     plt.plot(x,y)
     for x1, x2 in get_variable_regions(y):
-        print(x1, x2)
         plt.plot([x1, x2], [.6, .6], 'r-', lw=2)
     plt.show()    
 
 
 def main(filename):
+    # Reads the fasta file and gets the alignments
     alignments = utils.read_fasta_file(filename)
+
+    # Finds the conserved percentages
     conserved = get_conserved(alignments)
+
+    #Writes the identities to a file
     utils.write_identities(conserved)
-    #plot_variabilities(conserved)
+
+    # Plots the smoothened vriabilites
     y = plot_smooth_variabilites(conserved)
-    #utils.write_identities(y)
+
+    # Gets the regions with high variablilty
     regions = get_variable_regions(y)
-    #write_regions(regions)
+
+    # Writes the regions to a file
+    utils.write_regions(regions)
+
+    # Plots the variabilities with region markers
     plot_variabilities_with_regions(conserved)
 
     #Bonus calculations

@@ -28,3 +28,11 @@ def write_fasta_file(dictionary, filename):
         for key, value in dictionary.items():
             f.write('>' + key + '\n')
             f.write(value + '\n')
+
+'''
+writes the regions to a file
+'''
+def write_regions(regions):
+     with open('regions.txt', 'w') as f:
+        for x1, x2 in regions:
+            f.write(str(x1) + '\t' + str(x2) + '\n')
