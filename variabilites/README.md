@@ -5,5 +5,4 @@ the bonus part.
 
 Explantion for bonus:
 I've used my code to create the newick files and generated the tree visualisation using an online tool.
-reg4 is most similar to the whole-16S tree as expected because this is the region with the highest conservation amongst the variable regions and it is also longer than the others. 
-Specifically comparing it to reg1, reg4 is longer and has better conservation.
+reg4 is more similar to the whole 16s tree as expected because it has higher conservation rate in this region compared to region 1. It is also longer than region1 and thus covers more bases
